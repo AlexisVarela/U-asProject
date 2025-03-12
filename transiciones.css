@@ -1,0 +1,153 @@
+body{
+    height: 100vh;
+    width: 100vw;
+    padding: 0;
+    margin: 0;
+    background-color: antiquewhite;
+    display: flex;
+    flex-direction: column;
+}
+
+header{
+    background-color: rgb(63, 63, 63);
+    width: 100%;
+    height: 10%;
+    position: fixed;
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    z-index: 1;
+    /* opacity: .5; */
+}
+
+main{
+    background-color: aliceblue;
+    /* margin-top: 10%; */
+    width: 100%;
+    height: 100%;
+    display: flex;
+    /* justify-content: center; */
+    align-items: center;
+    flex-direction: column;
+    /* align-items: center; */
+    /* transition: opacity 1s ease-in 1s, visibility 1s ease-in 1s; */
+}
+
+/*Inicio de deepseek*/
+
+#menu {
+    z-index: 1;
+    color: white;
+    position: fixed;
+    top: 10%;
+    left:0;
+    background-color: rgb(63, 63, 63);
+    width: 25%;
+    max-width: 300px;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    animation: cerrarMenu .5s ease-out forwards;
+    transition: opacity .5s ease, visibility 1s ease;
+}
+
+#menu.visible {
+    transition: transform 0.5s;
+    opacity: 1;
+    visibility: visible;
+    animation: slideDown .5s ease-out forwards;
+            /* Nombre  duración   tiempo-función    */
+}
+
+.enlace{
+    position: relative;
+    left: 20px;
+    margin-top: 10px;
+    border: 1px solid black;
+    border-radius: 10px;
+    width: 150px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding-left: 8px;
+}
+
+@keyframes slideDown {
+    from { /*De donde parte*/
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+    to { /*En que termina*/
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes cerrarMenu {
+    from { /*De donde parte*/
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to { /*En que termina*/
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+}
+
+/*Fin del menu*/
+
+button{
+    border: none;
+    width: 70px;
+    height: 100%;
+    color: white;
+    background-color: rgb(63, 63, 63);
+    display: flex;
+}
+
+header img{
+    width: 50px;
+    height: 50px;
+    margin-right: 15px;
+}
+
+/* Galeria */
+.Galeria{
+    width: 88%;
+    height: auto;
+    margin: 10% 30px 0 30px;
+    background-color: black;
+}
+.nosotros{
+    background-color: darkmagenta;
+    border-radius: 20px;
+    margin: 20px;
+    padding: 20px;width: 88%;
+}
+.TituloChido{
+    justify-self: center;
+    margin: 10px;
+    color: rgb(248, 248, 248);
+    font-family: 'Times New Roman', Times, serif;
+
+}
+section{
+    display: flex;
+    width: 100%;
+    height: 430px;
+}
+section img{
+    width: 0px;
+    flex-grow: 1;
+    object-fit: cover;
+    opacity: .8;
+    transition: .5s;
+}
+section img:hover{
+    cursor: crosshair;
+    width: 300px;
+    opacity: 1;
+    filter: contrast(120%);
+}
+
