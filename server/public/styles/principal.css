@@ -115,6 +115,10 @@ header img{
     /*      arriba, derecha, izquierda, abajo */
     background-color: black;
 }
+
+h2{
+    color: white;
+}
 .nosotros{
     background-color: darkmagenta;
     border-radius: 20px;

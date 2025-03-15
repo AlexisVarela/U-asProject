@@ -26,3 +26,7 @@ app.get('/', (req, res)=>{
     // res.sendFile(path.join(__dirname, 'views', 'principal.html'));;
     res.render('carrucel');
 });
+
+app.get('/formulario', (req, res)=>{
+    res.render('formulario');
+});
