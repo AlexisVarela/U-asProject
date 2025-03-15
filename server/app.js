@@ -30,6 +30,6 @@ app.get('/', (req, res)=>{
 });
 
 
-app.get('/Analiticas', (req, res)=>{
-    res.render('Analiticas');
+app.get('/Citas', (req, res)=>{
+    res.render('Citas', {title: 'citas', cssFile: '/styles/citas.css'});
 });
