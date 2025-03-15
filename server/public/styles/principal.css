@@ -28,6 +28,14 @@ main{
     flex-direction: column;
 }
 
+a{
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: white;
+
+}
+
 /*Inicio de deepseek*/
 
 #menu {
@@ -113,7 +121,7 @@ header img{
     height: auto;
     margin: 10% 30px 0 30px;
     /*      arriba, derecha, izquierda, abajo */
-    background-color: black;
+    background-color: rgba(0, 0, 0, 0);
 }
 .nosotros{
     background-color: darkmagenta;

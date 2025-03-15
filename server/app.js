@@ -15,6 +15,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 
+
+
 // Definición de puerto
 app.listen(PORT, () => {
     console.log('Ya jalo TU', PORT);
@@ -25,4 +27,9 @@ app.listen(PORT, () => {
 app.get('/', (req, res)=>{
     // res.sendFile(path.join(__dirname, 'views', 'principal.html'));;
     res.render('carrucel');
+});
+
+
+app.get('/Analiticas', (req, res)=>{
+    res.render('Analiticas');
 });
