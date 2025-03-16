@@ -17,13 +17,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Definición de puerto
 app.listen(PORT, () => {
-    console.log('Ya jalo TU', PORT);
-
+    console.log(`Ya jalo TU, http://localhost:${PORT}`);
 });
 
 // Rutas
 app.get('/', (req, res)=>{
-    // res.sendFile(path.join(__dirname, 'views', 'principal.html'));;
     res.render('carrucel');
 });
 
