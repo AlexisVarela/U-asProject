@@ -1,0 +1,29 @@
+<%- include('layout', {title: 'Registro', body: `
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/styles/LoginBD.css">
+</head>
+<body>
+    <form action="/register" method="POST" class="form-box">
+        <h2>Registro</h2>
+        <input type="text" name="nombre" placeholder="Nombre" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Contraseña" required>
+
+        <div class="boton">
+            <button class="boton" type="submit">Registrarse</button>
+        </div>
+        
+        <div>
+            <a>¿Ya tienes cuenta?</a> <a href="/login" class="a-href">Inicia sesión</a>
+        </div>
+
+    </form>
+</body>
+</html>
+
+` }) %>
