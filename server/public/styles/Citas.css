@@ -4,3 +4,11 @@ h1{
     font-size: 50px;
     font-family: 'Arial';
 }
+.Bloque-Padre{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 20px;
+    background-color: cadetblue;
+}

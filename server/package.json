@@ -11,6 +11,7 @@
   "author": "Gabriel Figueras",
   "license": "ISC",
   "dependencies": {
+    "date-holidays": "^3.24.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "googleapis": "^146.0.0",

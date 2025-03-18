@@ -3,7 +3,7 @@ const express = require('express');
 const app = express();
 require('dotenv').config();
 const path = require('path');
-
+//Cositas de google calendar
 const GoogleCalendar = require('./googleCalendar.js');
 
 const googleCalendar = new GoogleCalendar(
@@ -19,7 +19,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json()); // Para procesar JSON en las solicitudes
 
-// Ruta para crear un evento
+// Ruta para crear un evento de Google Calendar
 app.post('/crear-evento', async (req, res) => {
   const { summary, location, description, start, end } = req.body;
 
@@ -45,7 +45,7 @@ app.post('/crear-evento', async (req, res) => {
   }
 });
 
-// Ruta para verificar disponibilidad
+// Ruta para verificar disponibilidad de Google Calendar
 app.post('/verificar-disponibilidad', async (req, res) => {
   const { start, end } = req.body;
 
@@ -61,7 +61,17 @@ app.post('/verificar-disponibilidad', async (req, res) => {
   }
 });
 
-// Rutas de vistas
+// Ruta para obtener eventos de Google Calendar
+app.get('/obtener-eventos', async (req, res) => {
+    try {
+        const eventos = await googleCalendar.getEvents(); // Método para obtener eventos
+        res.status(200).json(eventos);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Rutas de vistas ----------------------------------------------------------------------
 app.get('/', (req, res) => {
   res.render('carrucel');
 });
@@ -69,6 +79,7 @@ app.get('/', (req, res) => {
 app.get('/Citas', (req, res) => {
   res.render('Citas', { title: 'citas', cssFile: '/styles/citas.css' });
 });
+// Fin de Rutas de vistas ----------------------------------------------------------------
 
 // Iniciar el servidor
 app.listen(PORT, () => {

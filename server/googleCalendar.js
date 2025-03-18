@@ -36,6 +36,31 @@ class GoogleCalendar {
       throw new Error(`Error al verificar disponibilidad: ${error.message}`);
     }
   }
+  // CON ESTE MÉTODO SE OBTIENEN LOS EVENTOS DE GOOGLE CALENDAR
+  async getEvents() {
+    try {
+        const response = await this.calendar.events.list({
+            calendarId: 'primary', // Usar el calendario principal
+            timeMin: new Date().toISOString(), // Eventos a partir de la fecha actual
+            maxResults: 10, // Limitar el número de eventos
+            singleEvents: true,
+            orderBy: 'startTime',
+        });
+
+        // Formatear los eventos para FullCalendar
+        const eventos = response.data.items.map(evento => ({
+            title: evento.summary,
+            start: evento.start.dateTime || evento.start.date,
+            end: evento.end.dateTime || evento.end.date,
+        }));
+
+        return eventos;
+    } catch (error) {
+        console.error('Error al obtener eventos de Google Calendar:', error);
+        throw error;
+    }
+}
+// FIn de obtener eventos
 }
 
 module.exports = GoogleCalendar;
