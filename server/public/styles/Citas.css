@@ -11,4 +11,5 @@ h1{
     align-items: center;
     margin: 20px;
     background-color: cadetblue;
+    z-index: 1;
 }

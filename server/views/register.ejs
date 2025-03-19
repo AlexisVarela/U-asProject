@@ -1,0 +1,92 @@
+<%- include('layout', {title: 'Registro', body: `
+    <form id="registerForm" action="/register" method="POST" class="form-box">
+        <h2>Registro</h2>
+        <input type="text" name="nombre" placeholder="Nombre" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Contraseña" required>
+
+        <div class="boton">
+            <button class="boton" type="submit">Registrarse</button>
+        </div>
+        
+        <div>
+            <a>¿Ya tienes cuenta?</a> <a href="/login" class="a-href">Inicia sesión</a>
+        </div>
+        ` }) %>
+        <!-- Google reCAPTCHA -->
+        <div class="g-recaptcha" data-sitekey="<%= recaptchaSiteKey %>"></div>
+    </form>
+
+    <!-- Mensaje de error -->
+    <div id="errorMessage" style="display: none; position: fixed; top: 20px; right: 20px; background-color: #ff4444; color: white; padding: 15px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+        <span id="errorText"></span>
+        <button onclick="closeErrorMessage()" style="background: none; border: none; color: white; cursor: pointer; margin-left: 10px;">×</button>
+    </div>
+
+    <!-- Script de reCAPTCHA -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+    <!-- Script para manejar el mensaje de error -->
+    <script>
+        // Función para mostrar el mensaje de error
+        function showErrorMessage(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
+        // Función para cerrar el mensaje de error
+        function closeErrorMessage() {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.style.display = 'none';
+        }
+
+        // Interceptar el envío del formulario
+        document.getElementById('registerForm').addEventListener('submit', async (event) => {
+            event.preventDefault(); // Evitar el envío normal del formulario
+
+            // Obtener la respuesta del reCAPTCHA
+            const recaptchaResponse = grecaptcha.getResponse();
+            if (!recaptchaResponse) {
+                showErrorMessage('Por favor, completa el reCAPTCHA.');
+                return;
+            }
+
+            // Crear un objeto con los datos del formulario
+            const formData = {
+                nombre: event.target.nombre.value,
+                email: event.target.email.value,
+                password: event.target.password.value,
+                'g-recaptcha-response': recaptchaResponse,
+            };
+
+            try {
+                // Enviar el formulario manualmente
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+
+                // Procesar la respuesta del servidor
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Registro exitoso
+                    showErrorMessage('Registro exitoso.'); // Mostrar mensaje de éxito
+                    setTimeout(() => {
+                        window.location.href = '/success'; // Redirigir a una página de éxito
+                    }, 2000); // Redirigir después de 2 segundos
+                } else {
+                    // Mostrar mensaje de error del servidor
+                    showErrorMessage(result.error || 'Error en el registro.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showErrorMessage('Error interno del servidor.');
+            }
+        });
+    </script>
