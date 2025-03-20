@@ -1,47 +1,52 @@
 // Requerimientos
 const express = require('express');
 const app = express();
-const env = require('dotenv').config();
+const dotenv = require('dotenv');
 const path = require("path");
-const mysql = require('mysql2');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
+const { pool } = require('./controller/config/conexionbd');
+
+
+
+// Cargar variables de entorno
+dotenv.config();
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-
+// Configuración de la sesión
 app.use(session({
     secret: process.env.SESSION_SECRET,  
     resave: false,
     saveUninitialized: true
 }));
 
+const PORT = process.env.PORT || 3000;
 
-const PORT = process.env.PORT || 3000 ;
-
-//Configurar el motor de plantillas los htmls y archivos ejs.
+// Configurar el motor de plantillas
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-// Para que busque los archivos estaticos en la carpeta public
-app.use(express.static(path.join(__dirname, 'public')));
 
+// Archivos estáticos
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Definición de puerto
 app.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
+    console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });
 
+
 // Rutas
-app.get('/', (req, res)=>{
+app.get('/', (req, res) => {
     res.render('carrucel');
 });
 
-
-app.get('/paginaCualquiera', (req, res)=>{
+app.get('/paginaCualquiera', (req, res) => {
     res.render('formulario');
 });
-//BASE DE DATOS ERIC
+
 app.get('/register', (req, res) => {
     res.render('register', { titulo: "Registro" });
 });
@@ -51,14 +56,17 @@ app.post('/register', async (req, res) => {
     const { nombre, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    db.query('INSERT INTO usuarios (nombre, email, password) VALUES (?, ?, ?)',
-        [nombre, email, hashedPassword], (err, result) => {
-            if (err) {
-                console.error('Error en el registro:', err);
-                return res.send('Error al registrar usuario');
-            }
-            res.redirect('/login');
-        });
+    try {
+        const connection = await pool.getConnection();
+        await connection.query('INSERT INTO usuarios (nombre, email, password) VALUES (?, ?, ?)', 
+            [nombre, email, hashedPassword]);
+        connection.release(); // Liberar conexión del pool
+
+        res.redirect('/login');
+    } catch (err) {
+        console.error('Error en el registro:', err);
+        res.send('Error al registrar usuario');
+    }
 });
 
 // Ruta para mostrar el formulario de login
@@ -67,13 +75,18 @@ app.get('/login', (req, res) => {
 });
 
 // Ruta para procesar el login
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
-    db.query('SELECT * FROM usuarios WHERE email = ?', [email], async (err, results) => {
-        if (err || results.length === 0) {
+    try {
+        const connection = await pool.getConnection();
+        const [results] = await connection.query('SELECT * FROM usuarios WHERE email = ?', [email]);
+        connection.release();
+
+        if (results.length === 0) {
             return res.send('Usuario no encontrado');
         }
+
         const user = results[0];
 
         // Verificar contraseña
@@ -84,9 +97,11 @@ app.post('/login', (req, res) => {
 
         req.session.user = user;
         res.redirect('/');
-    });
+    } catch (err) {
+        console.error('Error en el login:', err);
+        res.send('Error en el login');
+    }
 });
-
 
 // Ruta para cerrar sesión
 app.get('/logout', (req, res) => {
@@ -97,22 +112,3 @@ app.get('/logout', (req, res) => {
 
 // Middleware para procesar formularios
 app.use(bodyParser.urlencoded({ extended: true }));
-
-// Crear la conexión a MySQL usando las variables de entorno
-const db = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
-});
-
-// Conectar a la base de datos
-db.connect(err => {
-    if (err) {
-        console.error('Error al conectar a MySQL:', err);
-        return;
-    }
-    console.log('Conectado a MySQL');
-});
-
-// TERMINO ERIC
