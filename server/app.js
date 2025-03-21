@@ -41,6 +41,8 @@ app.get('/', (req, res)=>{
 app.get('/paginaCualquiera', (req, res)=>{
     res.render('formulario');
 });
+
+
 //BASE DE DATOS ERIC
 app.get('/register', (req, res) => {
     res.render('register', { titulo: "Registro" });
