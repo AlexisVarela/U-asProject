@@ -4,12 +4,59 @@ h1{
     font-size: 50px;
     font-family: 'Arial';
 }
+
+#citaForm{
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    grid-template-rows: repeat(2, 1fr);
+    grid-template-areas: 
+    "labels inputs"
+    " button button";
+    gap: 15px;
+    width: 60%;
+
+}
+
+.btn-primary{
+    grid-area: button;
+    justify-self: center;
+    justify-content: center;
+    align-items: center;
+    width: 120px;
+    height: 40px;
+
+}
+
+#calendario{
+    width: 70%;
+    height: 50%;
+}
+
+.inputs{
+    display: flex;
+    border-radius: 10px;
+    cursor: pointer;
+    gap: 10px;
+    flex-direction: column;
+    grid-area: inputs;
+
+}
+
+.labels{
+    gap: 17px;
+    display: flex;
+    flex-direction: column;
+    grid-area: labels;
+}
+
+
 .Bloque-Padre{
+    width: 100%;
+    height: auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin: 20px;
     background-color: cadetblue;
     z-index: 1;
 }

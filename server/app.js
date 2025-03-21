@@ -1,30 +1,36 @@
-// app.js
 const express = require('express');
 const app = express();
-require('dotenv').config();
-const path = require('path');
+const dotenv = require('dotenv');
+const path = require("path");
+const bodyParser = require('body-parser');
+const bcrypt = require('bcryptjs');
+const session = require('express-session');
+const { pool } = require('./controller/config/conexionbd');
 const axios = require('axios'); // Para hacer solicitudes HTTP
-const bcrypt = require('bcrypt'); // bcrypt para hashear contraseñas
 
+dotenv.config();
+require('dotenv').config();
 
-// COSAS DEL ERIC   ---------------------------------------------------------------------
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
+// Configuración de la sesión
+app.use(session({
+    secret: process.env.SESSION_SECRET,  
+    resave: false,
+    saveUninitialized: true
+}));
 
-
-
-
-// FIN COSAS DEL ERIC   ---------------------------------------------------------------------
-
+// Configurar el motor de plantillas
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
 //Cositas de google calendar
 const GoogleCalendar = require('./googleCalendar.js');
-
-
-
 const googleCalendar = new GoogleCalendar(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_REFRESH_TOKEN
+process.env.GOOGLE_CLIENT_ID,
+process.env.GOOGLE_CLIENT_SECRET,
+process.env.GOOGLE_REFRESH_TOKEN
 );
 
 // Configurar el servidor
@@ -34,46 +40,47 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json()); // Para procesar JSON en las solicitudes
 
+
 // Ruta para crear un evento de Google Calendar
 app.post('/crear-evento', async (req, res) => {
-  const { summary, location, description, start, end } = req.body;
+const { summary, location, description, start, end } = req.body;
 
-  const event = {
+const event = {
     summary,
     location,
     description,
     start: {
-      dateTime: start,
-      timeZone: 'America/Chihuahua',
+    dateTime: start,
+    timeZone: 'America/Chihuahua',
     },
     end: {
-      dateTime: end,
-      timeZone: 'America/Chihuahua',
+    dateTime: end,
+    timeZone: 'America/Chihuahua',
     },
-  };
+};
 
-  try {
+try {
     const result = await googleCalendar.createEvent(event);
     res.status(200).json({ message: 'Evento creado con éxito', event: result });
-  } catch (error) {
+} catch (error) {
     res.status(500).json({ error: error.message });
-  }
+}
 });
 
 // Ruta para verificar disponibilidad de Google Calendar
 app.post('/verificar-disponibilidad', async (req, res) => {
-  const { start, end } = req.body;
+const { start, end } = req.body;
 
-  try {
+try {
     const busySlots = await googleCalendar.checkAvailability(start, end);
     if (busySlots.length === 0) {
-      res.status(200).json({ available: true });
+    res.status(200).json({ available: true });
     } else {
-      res.status(200).json({ available: false, busySlots });
+    res.status(200).json({ available: false, busySlots });
     }
-  } catch (error) {
+} catch (error) {
     res.status(500).json({ error: error.message });
-  }
+}
 });
 
 // Ruta para obtener eventos de Google Calendar
@@ -89,97 +96,77 @@ app.get('/obtener-eventos', async (req, res) => {
 
 // Rutas de vistas ----------------------------------------------------------------------
 app.get('/', (req, res) => {
-  res.render('carrucel');
+res.render('carrucel');
 });
 
 app.get('/Citas', (req, res) => {
-  res.render('Citas', { title: 'citas', cssFile: '/styles/citas.css' });
+res.render('Citas', { title: 'citas', cssFile: '/styles/citas.css' });
 });
 // Fin de Rutas de vistas ----------------------------------------------------------------
 
-
-//BASE DE DATOS ERIC
 app.get('/register', (req, res) => {
-    res.render('register', { titulo: "Registro",  cssFile: '/styles/LoginDB.css', 
-        recaptchaSiteKey: process.env.GOOGLE_CLAVE_DE_SITIO // Pasar la clave al frontend
-        
+    res.render('register', { 
+        title: "Registro",  
+        cssFile: '/styles/LoginDB.css', 
+        recaptchaSiteKey: process.env.GOOGLE_CLAVE_DE_SITIO // Pasar la clave de sitio
     });
-    
 });
-// Ruta para manejar el envío del formulario (POST /register)
+
 app.post('/register', async (req, res) => {
     const { 'g-recaptcha-response': recaptchaResponse, nombre, email, password } = req.body;
 
-    // Verificar si el usuario completó el reCAPTCHA
     if (!recaptchaResponse) {
         return res.status(400).json({ error: 'Por favor, completa el reCAPTCHA.' });
     }
 
     try {
-        // Verificar reCAPTCHA con Google
-        const response = await axios.post(
-            `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.GOOGLE_CLAVE_SECRETA}&response=${recaptchaResponse}`
-        );
+        // Verificar reCAPTCHA
+        const { data } = await axios.post('https://www.google.com/recaptcha/api/siteverify', null, {
+            params: {
+                secret: process.env.GOOGLE_CLAVE_SECRETA,
+                response: recaptchaResponse
+            }
+        });
 
-        const { success } = response.data;
-
-        if (success) {
-            // reCAPTCHA válido, procesar el formulario
-            const hashedPassword = await bcrypt.hash(password, 10); // Hashear la contraseña
-
-            // Insertar el usuario en la base de datos
-            db.query(
-                'INSERT INTO usuarios (nombre, email, password) VALUES (?, ?, ?)',
-                [nombre, email, hashedPassword],
-                (err, result) => {
-                    if (err) {
-                        console.error('Error en el registro:', err);
-                        return res.status(500).json({ error: 'Error al registrar usuario.' });
-                    }
-                    res.json({ message: 'Registro exitoso.' });
-                }
-            );
-        } else {
-            // reCAPTCHA inválido
-            res.status(400).json({ error: 'Error en la verificación de reCAPTCHA.' });
+        if (!data.success) {
+            return res.status(400).json({ error: 'Error en la verificación de reCAPTCHA.' });
         }
+
+        // Hash de la contraseña
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        // Insertar en la base de datos
+        const connection = await pool.getConnection();
+        await connection.query(
+            'INSERT INTO usuarios (nombre, email, password) VALUES (?, ?, ?)', 
+            [nombre, email, hashedPassword]
+        );
+        connection.release();
+
+        res.status(200).json({ success: true, redirect: '/login' });
     } catch (error) {
-        console.error('Error al verificar reCAPTCHA:', error);
-        res.status(500).json({ error: 'Error interno del servidor.' });
+        console.error('Error en el registro:', error);
+        res.status(500).json({ error: 'Error al registrar usuario.' });
     }
 });
-
-// Ruta para procesar el registro
-
-app.post('/register', async (req, res) => {
-    const { nombre, email, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    db.query('INSERT INTO usuarios (nombre, email, password) VALUES (?, ?, ?)',
-        [nombre, email, hashedPassword], (err, result) => {
-            if (err) {
-                console.error('Error en el registro:', err);
-                return res.send('Error al registrar usuario');
-            }
-            res.redirect('/login');
-        });
-});
-
 // Ruta para mostrar el formulario de login
 app.get('/login', (req, res) => {
     res.render('login', { titulo: "Iniciar Sesión", cssFile: '/styles/LoginDB.css' });
 });
 
-
-
 // Ruta para procesar el login
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
-    db.query('SELECT * FROM usuarios WHERE email = ?', [email], async (err, results) => {
-        if (err || results.length === 0) {
+    try {
+        const connection = await pool.getConnection();
+        const [results] = await connection.query('SELECT * FROM usuarios WHERE email = ?', [email]);
+        connection.release();
+
+        if (results.length === 0) {
             return res.send('Usuario no encontrado');
         }
+
         const user = results[0];
 
         // Verificar contraseña
@@ -190,7 +177,10 @@ app.post('/login', (req, res) => {
 
         req.session.user = user;
         res.redirect('/');
-    });
+    } catch (err) {
+        console.error('Error en el login:', err);
+        res.send('Error en el login');
+    }
 });
 
 
@@ -202,22 +192,7 @@ app.get('/logout', (req, res) => {
 });
 
 // Middleware para procesar formularios
-
-// Crear la conexión a MySQL usando las variables de entorno
-
-
-// Conectar a la base de datos
-
-// TERMINO ERIC
-
-
-
-
-
-
-
-
-
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // AQUI COMIENZA EL DASHBOARD
 app.get('/dashboard', (req, res) => {
@@ -232,9 +207,7 @@ app.get('/EstiloUnas', (req, res) => {
     res.render('EstiloUnas', { title: 'Estilos de Uñas', cssFile: '/styles/Estilos.css' });
 });
 
-
-
 // Iniciar el servidor
 app.listen(PORT, () => {
-  console.log('Servidor corriendo en el puerto', PORT);
+    console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });

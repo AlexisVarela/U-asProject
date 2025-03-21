@@ -1,0 +1,52 @@
+
+/* Galeria */
+.Galeria{
+    width: 90%;
+    height: auto;
+    margin-top: 20px;
+    background-color: black;
+}
+
+.lorem{
+    margin-top: 20px;
+    width: 80%;
+    height: auto;
+    max-height: 400px;
+    background-color: rgb(75, 75, 75);
+}
+
+h2{
+    color: white;
+}
+.nosotros{
+    background-color: darkmagenta;
+    border-radius: 20px;
+    margin: 20px;
+    padding: 20px;width: 88%;
+}
+.TituloChido{
+    justify-self: center;
+    margin: 10px;
+    color: rgb(248, 248, 248);
+    font-family: 'Times New Roman', Times, serif;
+
+}
+section{
+    display: flex;
+    width: 100%;
+    height: 430px;
+}
+section img{
+    width: 0px;
+    flex-grow: 1;
+    object-fit: cover;
+    opacity: .8;
+    transition: .5s;
+}
+section img:hover{
+    cursor: pointer;
+    width: 300px;
+    opacity: 1;
+    filter: contrast(120%);
+}
+
