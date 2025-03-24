@@ -2,28 +2,91 @@
     <div class="dashboard-container">
         <h1>Dashboard Estadístico</h1>
 
-        <!-- Sección de gráficas -->
-        <div class="charts-container">
-            <!-- Gráfica 1: Gráfica de barras -->
-            <div class="chart-card">
-                <h2>Ventas Mensuales</h2>
-                <canvas id="salesChart"></canvas>
-            </div>
+        <!-- Gráfica de clics en tarjetas -->
+        <div id="chart_clics" style="width: 900px; height: 500px;"></div>
 
-            <!-- Gráfica 2: Gráfica de pastel -->
-            <div class="chart-card">
-                <h2>Distribución de Productos</h2>
-                <canvas id="productsChart"></canvas>
-            </div>
-
-            <!-- Gráfica 3: Gráfica de líneas -->
-            <div class="chart-card">
-                <h2>Tráfico de Usuarios</h2>
-                <canvas id="trafficChart"></canvas>
-            </div>
-        </div>
+        <!-- Gráfica de usuarios -->
+        <div id="chart_usuarios" style="width: 900px; height: 500px; margin-top: 50px;"></div>
     </div>
-    <div id="chart_div"></div>
 
+    <!-- Carga la librería de Google Charts -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', {packages: ['corechart', 'bar']});
+        google.charts.setOnLoadCallback(() => {
+            drawChartClics(); // Dibuja la gráfica de clics
+            drawChartUsuarios(); // Dibuja la gráfica de usuarios
+        });
+    
+        // Función para dibujar la gráfica de clics
+        function drawChartClics() {
+            fetch('/obtener-clics')
+                .then(response => response.json())
+                .then(data => {
+                    const chartData = new google.visualization.DataTable();
+                    chartData.addColumn('string', 'Tarjeta');
+                    chartData.addColumn('number', 'Clics');
+    
+                    const rows = Object.keys(data).map(cardTitle => [cardTitle, data[cardTitle]]);
+                    chartData.addRows(rows);
+    
+                    const options = {
+                        title: 'Clics en Tarjetas',
+                        chartArea: {width: '50%'},
+                        hAxis: {
+                            title: 'Clics',
+                            minValue: 0,
+                        },
+                        vAxis: {
+                            title: 'Tarjeta',
+                        },
+                        bars: 'horizontal',
+                    };
+    
+                    const chart = new google.visualization.BarChart(document.getElementById('chart_clics'));
+                    chart.draw(chartData, options);
+                })
+                .catch(error => {
+                    console.error('Error al obtener los datos de clics:', error);
+                });
+        }
+    
+        // Función para dibujar la gráfica de usuarios
+// Función para dibujar la gráfica de usuarios
+function drawChartUsuarios() {
+    fetch('/obtener-usuarios-analytics')
+        .then(response => response.json())
+        .then(data => {
+            const chartData = new google.visualization.DataTable();
+            chartData.addColumn('string', 'Fecha');
+            chartData.addColumn('number', 'Usuarios');
 
+            // Procesa los datos de Google Analytics
+            const rows = data.map(item => [item.fecha, item.usuarios]);
+            chartData.addRows(rows);
+
+            // Opciones de la gráfica
+            const options = {
+                title: 'Usuarios por Día (Google Analytics)',
+                chartArea: {width: '50%'},
+                hAxis: {
+                    title: 'Fecha',
+                },
+                vAxis: {
+                    title: 'Usuarios',
+                    minValue: 0,
+                },
+                bars: 'vertical', // Muestra las barras verticalmente
+            };
+
+            // Dibuja la gráfica
+            const chart = new google.visualization.ColumnChart(document.getElementById('chart_usuarios'));
+            chart.draw(chartData, options);
+        })
+        .catch(error => {
+            console.error('Error al obtener los datos de usuarios:', error);
+        });
+}
+    
+    </script>
 ` }) %>

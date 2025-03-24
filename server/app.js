@@ -6,7 +6,165 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const { pool } = require('./controller/config/conexionbd');
+const citasPendientes = new Map(); // Almacena citas pendientes de confirmación
+const { v4: uuidv4 } = require('uuid');
+const { getAnalyticsUsers } = require('./public/js/analytics'); // Importa la función desde analytics.js
+
+// Cargar las variables de entorno
+dotenv.config();  // Esto cargará las variables del archivo .env
+
+// Middleware para parsear cuerpos JSON
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Rutas aquí...
+
 const axios = require('axios'); // Para hacer solicitudes HTTP
+
+
+const { google } = require('googleapis');
+const analytics = google.analyticsreporting('v4'); // Usamos la API de Reporting v4
+
+// Configura la autenticación
+const authClient = new google.auth.JWT({
+    email: process.env.CORREO_ANALYTICS, // Correo de la cuenta de servicio
+    key: process.env.ID_ANALYTICS.replace(/\\n/g, '\n'), // Clave privada (reemplaza \\n por \n)
+    scopes: ['https://www.googleapis.com/auth/analytics.readonly'],
+});
+
+
+// Ruta para obtener los datos de usuarios desde Google Analytics
+// Ruta para obtener los datos de usuarios desde Google Analytics
+app.get('/obtener-usuarios-analytics', async (req, res) => {
+    try {
+        const data = await getAnalyticsUsers();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+// API DE ANALITYCS
+// Ruta para registrar clics en las tarjetas
+// Esta ruta podría ser llamada desde el frontend al hacer clic en una tarjeta
+app.post('/track-click', (req, res) => {
+    const { title } = req.body;
+
+    // Aquí puedes almacenar el clic en una base de datos o en memoria
+    // Por ejemplo, podrías usar un Map para almacenar los clics temporalmente
+    if (!clicksMap.has(title)) {
+        clicksMap.set(title, 1);
+    } else {
+        clicksMap.set(title, clicksMap.get(title) + 1);
+    }
+
+    res.json({ success: true, title });
+});
+
+// Variable para almacenar los clics (puedes usar una base de datos en su lugar)
+const clicksMap = new Map();
+// Ruta para obtener los datos de clics
+app.get('/get-clicks', (req, res) => {
+    const clicksData = Array.from(clicksMap).map(([title, count]) => ({ title, count }));
+    res.json(clicksData);
+});
+
+
+
+
+// Variable para almacenar los clics (puedes usar una base de datos en su lugar)
+
+
+// Variable global para almacenar los clics
+const clicsPorTarjeta = {};
+
+// Ruta para registrar clics
+app.post('/registrar-clic', (req, res) => {
+    const { cardTitle } = req.body;
+
+    if (!clicsPorTarjeta[cardTitle]) {
+        clicsPorTarjeta[cardTitle] = 1;
+    } else {
+        clicsPorTarjeta[cardTitle]++;
+    }
+
+    res.json({ success: true, cardTitle, count: clicsPorTarjeta[cardTitle] });
+});
+
+
+// Ruta para obtener los datos de clics
+app.get('/obtener-clics', (req, res) => {
+    res.json(clicsPorTarjeta);
+});
+
+
+
+
+
+
+
+// Importar Twilio
+const { enviarConfirmacion, agendarCita } = require("./public/js/correo"); // Importar funciones de correo
+// Fin de Importar Twilio
+
+// Ruta para agendar cita y enviar confirmación por Wcorreo
+app.post('/agendar-cita', async (req, res) => {
+    const { email, titulo, descripcion, fecha } = req.body;
+
+    // Validar el correo electrónico
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: "Correo electrónico inválido." });
+    }
+
+    try {
+        const token = uuidv4(); // Generar un token único
+        const hora = fecha.split('T')[1].slice(0, 5); // Extrae la hora (HH:MM)
+
+        // Guardar la cita pendiente de confirmación
+        citasPendientes.set(token, { email, titulo, descripcion, fecha });
+
+        // Enviar correo de confirmación
+        await enviarConfirmacion(email, fecha.split('T')[0], hora, token);
+
+        res.status(200).json({ mensaje: "✅ Correo de confirmación enviado. Por favor, revisa tu correo." });
+    } catch (error) {
+        console.error("❌ Error al agendar la cita:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+// Fin de ruta de agendar cita y enviar confirmación por correo
+
+app.get('/confirmar-cita', async (req, res) => {
+    const { token } = req.query;
+
+    if (!token || !citasPendientes.has(token)) {
+        return res.status(400).send("Token inválido o cita no encontrada.");
+    }
+
+    try {
+        const cita = citasPendientes.get(token);
+        const { email, titulo, descripcion, fecha } = cita;
+
+        // Agendar la cita en Google Calendar
+        await agendarCita(email, titulo, descripcion, fecha);
+
+        // Eliminar la cita pendiente de confirmación
+        citasPendientes.delete(token);
+
+        res.send("✅ Cita confirmada y agendada correctamente.");
+    } catch (error) {
+        console.error("❌ Error al confirmar la cita:", error);
+        res.status(500).send("Error al confirmar la cita.");
+    }
+});
+// Ruta para mostrar el formulario de agendar cita
+app.get('/agendar-cita', (req, res) => {
+    res.render('agendar-cita', { title: 'Agendar Cita', cssFile: '/styles/agendar.css' });
+  });
+// Fin de ruta de mostrar el formulario de agendar cita  
+
+
+
 
 dotenv.config();
 require('dotenv').config();
@@ -43,28 +201,19 @@ app.use(express.json()); // Para procesar JSON en las solicitudes
 
 // Ruta para crear un evento de Google Calendar
 app.post('/crear-evento', async (req, res) => {
-const { summary, location, description, start, end } = req.body;
+    const { summary, location, description, start, end } = req.body;
 
-const event = {
-    summary,
-    location,
-    description,
-    start: {
-    dateTime: start,
-    timeZone: 'America/Chihuahua',
-    },
-    end: {
-    dateTime: end,
-    timeZone: 'America/Chihuahua',
-    },
-};
+    if (!start) {
+        return res.status(400).json({ error: 'El campo start es requerido.' });
+    }
 
-try {
-    const result = await googleCalendar.createEvent(event);
-    res.status(200).json({ message: 'Evento creado con éxito', event: result });
-} catch (error) {
-    res.status(500).json({ error: error.message });
-}
+    try {
+        const linkEvento = await googleCalendar.createEvent(summary, description, start);
+        res.status(200).json({ message: 'Evento creado con éxito', link: linkEvento });
+    } catch (error) {
+        console.error('❌ Error al crear evento:', error.message);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // Ruta para verificar disponibilidad de Google Calendar

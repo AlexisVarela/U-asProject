@@ -3,46 +3,72 @@
         <h1>Estilos de Cortes de Cabello</h1>
         <div class="gallery">
             <!-- Estilo 1 -->
-            <div class="card">
+            <div class="card" onclick="trackClick('Corte Clásico Lima')">
                 <img src="/img/corte1.jpg" alt="Corte 1">
                 <h3>Corte Clásico Lima</h3>
                 <p>Un corte limpio y profesional, ideal para cualquier ocasión.</p>
             </div>
 
             <!-- Estilo 2 -->
-            <div class="card">
+            <div class="card" onclick="trackClick('Corte Moderno')">
                 <img src="/img/corte2.jpg" alt="Corte 2">
                 <h3>Corte Moderno</h3>
                 <p>Un estilo fresco y juvenil, perfecto para estar a la moda.</p>
             </div>
 
             <!-- Estilo 3 -->
-            <div class="card">
+            <div class="card" onclick="trackClick('Corte Degradado aguijudo')">
                 <img src="/img/corte3.jpeg" alt="Corte 3">
                 <h3>Corte Degradado aguijudo</h3>
                 <p>Un corte con degradado feroz, ideal para un look sofisticado.</p>
             </div>
 
             <!-- Estilo 4 -->
-            <div class="card">
+            <div class="card" onclick="trackClick('Corte Undercut')">
                 <img src="/img/corte4.jpg" alt="Corte 4">
                 <h3>Corte Undercut</h3>
                 <p>Un estilo audaz con los lados rapados y el largo en la parte superior.</p>
             </div>
 
             <!-- Estilo 5 -->
-            <div class="card">
+            <div class="card" onclick="trackClick('Corte Texturizado')">
                 <img src="/img/corte5.jpg" alt="Corte 5">
                 <h3>Corte Texturizado</h3>
                 <p>Un corte con textura y volumen, perfecto para un look desenfadado.</p>
             </div>
 
             <!-- Estilo 6 -->
-            <div class="card">
+            <div class="card" onclick="trackClick('Corte Magmatico')">
                 <img src="/img/corte6.jpg" alt="Corte 6">
                 <h3>Corte Magmatico</h3>
                 <p>Un estilo clásico de las tribus fosilizadas, ideal para un look ardiente.</p>
             </div>
         </div>
     </div>
+
+    <script>
+        function trackClick(cardTitle) {
+            gtag('event', 'click', {
+                'event_category': 'Tarjetas',
+                'event_label': cardTitle
+            });
+            console.log('Clic registrado en: ' + cardTitle);
+    
+            // Envía el nombre de la tarjeta al servidor para almacenarlo
+            fetch('/registrar-clic', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ cardTitle: cardTitle }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Clic registrado en el servidor:', data);
+            })
+            .catch(error => {
+                console.error('Error al registrar el clic:', error);
+            });
+        }
+    </script>
 ` }) %>

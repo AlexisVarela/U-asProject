@@ -1,0 +1,42 @@
+<%- include('layout', {title: 'Citas', body: `
+<form id="citaForm">
+    <label for="email">Correo electrónico:</label>
+    <input type="email" id="email" name="email" required>
+
+    <label for="titulo">Título de la cita:</label>
+    <input type="text" id="titulo" name="titulo" required />
+
+    <label for="descripcion">Descripción:</label>
+    <textarea id="descripcion" name="descripcion" required></textarea>
+
+    <label for="fecha">Fecha de la cita:</label>
+    <input type="datetime-local" id="fecha" name="fecha" required />
+
+    <button type="submit">Agendar cita</button>
+</form>
+
+<div id="mensaje" class="mt-3"></div>
+<script>
+    document.getElementById('citaForm').addEventListener('submit', async (e) => {
+        e.preventDefault(); // Evita que la página se recargue
+
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+
+        console.log("Datos del formulario:", data); // Verifica los datos
+
+        try {
+            const response = await fetch('/agendar-cita', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            document.getElementById('mensaje').textContent = result.mensaje || result.error;
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('mensaje').textContent = "❌ Error al enviar la solicitud.";
+        }
+    });
+</script>
+` }) %>
