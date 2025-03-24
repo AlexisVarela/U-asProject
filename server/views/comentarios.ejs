@@ -1,0 +1,9 @@
+<%-include('layout', {title: 'Carrucel', body: `
+<form action="/comentarios" method="POST">
+    <% if (usuario_id) { %>
+        <input type="hidden" name="usuario_id" value="<%= usuario_id %>">
+    <% } %>
+    <textarea name="contenido" placeholder="Escribe tu comentario..." required></textarea>
+    <button type="submit">Enviar</button>
+</form>
+` }) %>
