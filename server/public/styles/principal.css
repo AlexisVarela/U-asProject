@@ -22,7 +22,7 @@ header{
     margin: 0;
     display: flex;
     justify-content: space-between;
-    z-index: 2;
+    z-index: 10;
 }
 
 main{
@@ -34,10 +34,18 @@ main{
     flex-direction: column;
 }
 
-/*Inicio del menu*/
+a{
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: white;
+
+}
+
+/*Inicio de deepseek*/
 
 #menu {
-    z-index: 1;
+    z-index: 2;
     color: white;
     position: fixed;
     top: 10%;
@@ -68,8 +76,9 @@ main{
     width: 97%;
     height: 50px;
     display: flex;
+
     align-items: center;
-    gap: 5px;
+    gap: 10px;
     padding-left: 8px;
 }
 

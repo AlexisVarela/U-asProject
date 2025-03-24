@@ -2,6 +2,15 @@ const bcrypt = require('bcryptjs');
 const { pool } = require('./config/conexionbd');
 
 // Registrar usuario
+
+const reCAPTCHA = async (req, res) =>{
+    res.render('register', { 
+        title: "Registro",  
+        cssFile: '/styles/LoginDB.css', 
+        recaptchaSiteKey: process.env.GOOGLE_CLAVE_DE_SITIO // Pasar la clave de sitio
+    });
+}
+
 const registerUser = async (req, res) => {
     const { nombre, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -55,4 +64,4 @@ const logoutUser = (req, res) => {
     });
 };
 
-module.exports = { registerUser, loginUser, logoutUser };
+module.exports = { registerUser, loginUser, logoutUser,reCAPTCHA};

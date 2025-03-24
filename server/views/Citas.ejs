@@ -1,0 +1,124 @@
+<%- include('layout', {title: 'Citas', body: `
+<link rel="stylesheet" href="/styles/Citas.css">
+<div class="Bloque-Padre">
+    <h1>Agendar Cita</h1>
+    <form id="citaForm">
+        <div class="form-group">
+            <!-- <label for="summary">Título:</label> -->
+            <!-- <input type="text" id="summary" name="summary" class="form-control" required> -->
+        </div>
+
+        <div class="labels">
+            <label for="summary">Título:</label>
+            <label for="location">Ubicación:</label>
+            <label for="description">Descripción:</label>
+            <label for="start">Fecha y hora de inicio:</label>
+            <label for="end">Fecha y hora de fin:</label>
+        </div>
+
+        <div class="inputs">
+            <input type="text" id="summary" name="summary" class="form-control" required>
+            <input type="text" id="location" name="location" class="form-control" required>
+            <textarea id="description" name="description" class="form-control" required></textarea>
+            <input type="datetime-local" id="start" name="start" class="form-control" required>
+            <input type="datetime-local" id="end" name="end" class="form-control" required>
+        </div>
+
+        <!-- <div class="form-group"> -->
+            <!-- <label for="location">Ubicación:</label> -->
+            <!-- <input type="text" id="location" name="location" class="form-control" required> -->
+        <!-- </div> -->
+
+        <!-- <div class="form-group"> -->
+            <!-- <label for="description">Descripción:</label> -->
+            <!-- <textarea id="description" name="description" class="form-control" required></textarea> -->
+        <!-- </div> -->
+
+        <!-- <div class="form-group"> -->
+            <!-- <label for="start">Fecha y hora de inicio:</label> -->
+            <!-- <input type="datetime-local" id="start" name="start" class="form-control" required> -->
+        <!-- </div> -->
+
+        <!-- <div class="form-group"> -->
+            <!-- <label for="end">Fecha y hora de fin:</label> -->
+            <!-- <input type="datetime-local" id="end" name="end" class="form-control" required> -->
+        <!-- </div> -->
+
+        <button type="submit" class="btn-primary">Agendar</button>
+    </form>
+
+    <div id="mensaje" class="mt-3"></div>
+
+    <h2>Calendario</h2>
+    <div id="calendario"></div>
+
+    <script>
+        // Funcion de FullCalendar para mostrar el calendario
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendario');
+
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                events: async function(fetchInfo, successCallback, failureCallback) {
+                    try {
+                        const response = await fetch('/obtener-eventos', {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                        });
+                        const eventos = await response.json();
+                        successCallback(eventos);
+                    } catch (error) {
+                        failureCallback(error);
+                    }
+                },
+                eventClick: function(info) {
+                    alert('Evento: ' + info.event.title);
+                }
+            });
+
+            calendar.render();
+        });
+        // Funcion de google calendar
+        document.getElementById('citaForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = {
+                summary: document.getElementById('summary').value,
+                location: document.getElementById('location').value,
+                description: document.getElementById('description').value,
+                start: document.getElementById('start').value + ':00',
+                end: document.getElementById('end').value + ':00',
+            };
+
+            try {
+                const response = await fetch('/crear-evento', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    document.getElementById('mensaje').textContent = 'Cita agendada con éxito';
+                    document.getElementById('mensaje').style.color = 'green';
+                } else {
+                    document.getElementById('mensaje').textContent = 'Error: ' + result.error;
+                    document.getElementById('mensaje').style.color = 'red';
+                }
+            } catch (error) {
+                document.getElementById('mensaje').textContent = 'Error: ' + error.message;
+                document.getElementById('mensaje').style.color = 'red';
+            }
+        });
+    </script>
+    </div>
+` }) %>

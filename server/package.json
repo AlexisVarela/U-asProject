@@ -8,21 +8,26 @@
     "start": "node --watch app.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Gabriel Figueras",
   "license": "ISC",
-  "description": "",
   "dependencies": {
+    "axios": "^1.8.3",
+    "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
     "body-parser": "^1.20.3",
+    "date-holidays": "^3.24.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-session": "^1.18.1",
+    "googleapis": "^146.0.0",
     "method-override": "^3.0.0",
     "mongoose": "^8.12.2",
     "mysql2": "^3.13.0",
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "whatwg-url": "^14.2.0"
   },
   "devDependencies": {
     "ejs": "^3.1.10"
-  }
+  },
+  "description": ""
 }

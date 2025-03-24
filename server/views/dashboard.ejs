@@ -1,0 +1,29 @@
+<%- include('layout', {title: 'Dashboard', body: `
+    <div class="dashboard-container">
+        <h1>Dashboard Estadístico</h1>
+
+        <!-- Sección de gráficas -->
+        <div class="charts-container">
+            <!-- Gráfica 1: Gráfica de barras -->
+            <div class="chart-card">
+                <h2>Ventas Mensuales</h2>
+                <canvas id="salesChart"></canvas>
+            </div>
+
+            <!-- Gráfica 2: Gráfica de pastel -->
+            <div class="chart-card">
+                <h2>Distribución de Productos</h2>
+                <canvas id="productsChart"></canvas>
+            </div>
+
+            <!-- Gráfica 3: Gráfica de líneas -->
+            <div class="chart-card">
+                <h2>Tráfico de Usuarios</h2>
+                <canvas id="trafficChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div id="chart_div"></div>
+
+
+` }) %>

@@ -1,29 +1,98 @@
-<%- include('layout', {title: 'Registro', body: `
+<%- include('layout', { body: '' }) %>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/styles/LoginBD.css">
-</head>
-<body>
-    <form action="/register" method="POST" class="form-box">
-        <h2>Registro</h2>
-        <input type="text" name="nombre" placeholder="Nombre" required>
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Contraseña" required>
+<link rel="stylesheet" href="/styles/LoginBD.css">
 
-        <div class="boton">
-            <button class="boton" type="submit">Registrarse</button>
-        </div>
-        
-        <div>
-            <a>¿Ya tienes cuenta?</a> <a href="/login" class="a-href">Inicia sesión</a>
+<form id="registerForm" action="/register" method="POST" class="form-box">
+    <h2>Registro</h2>
+    <input type="text" name="nombre" placeholder="Nombre" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <input type="password" name="password" placeholder="Contraseña" required>
+
+    <!-- Google reCAPTCHA dentro del formulario -->
+    <div class="g-recaptcha" data-sitekey="<%= recaptchaSiteKey %>"></div>
+        <!-- Mensaje de error debajo del reCAPTCHA -->
+    <div id="errorMessage" class="error-message">
+            <span id="errorText"></span>
         </div>
 
-    </form>
-</body>
-</html>
+    <button class="boton" type="submit">Registrarse</button>
+    
+    <div class="url-log">
+        <p>¿Ya tienes cuenta?</p> <a href="/login" class="a-href">Inicia sesión</a>
+    </div>
+</form>
 
-` }) %>
+<!-- Script de Google reCAPTCHA -->
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+<!-- Script para manejar el mensaje de error -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Función para mostrar el mensaje de error
+        function showErrorMessage(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            if (errorMessage && errorText) {
+                errorText.textContent = message;
+                errorMessage.style.display = 'block'; // Mostrar el mensaje
+
+                // Cerrar el mensaje automáticamente después de 1.5 segundos
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 1500); // 1500 milisegundos = 1.5 segundos
+            } else {
+                console.error('Elementos errorMessage o errorText no encontrados');
+            }
+        }
+
+        // Interceptar el envío del formulario
+        const registerForm = document.getElementById('registerForm');
+        if (registerForm) {
+            registerForm.addEventListener('submit', async (event) => {
+                event.preventDefault(); // Evitar el envío normal del formulario
+
+                // Obtener la respuesta del reCAPTCHA
+                const recaptchaResponse = grecaptcha.getResponse();
+                if (!recaptchaResponse) {
+                    showErrorMessage('Por favor, completa el reCAPTCHA.');
+                    return;
+                }
+
+                // Crear un objeto con los datos del formulario
+                const formData = {
+                    nombre: event.target.nombre.value,
+                    email: event.target.email.value,
+                    password: event.target.password.value,
+                    'g-recaptcha-response': recaptchaResponse,
+                };
+
+                try {
+                    // Enviar el formulario manualmente
+                    const response = await fetch('/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData),
+                    });
+
+                    // Procesar la respuesta del servidor
+                    const result = await response.json();
+
+                    if (response.ok && result.success) {
+                        // Registro exitoso, redirigir a la página de login
+                        window.location.href = result.redirect;
+                    } else {
+                        // Mostrar mensaje de error del servidor
+                        showErrorMessage(result.error || 'Error en el registro.');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showErrorMessage('Error interno del servidor.');
+                }
+            });
+        } else {
+            console.error('Formulario de registro no encontrado');
+        }
+    });
+</script>
