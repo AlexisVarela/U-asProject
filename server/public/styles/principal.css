@@ -8,6 +8,12 @@ body{
     flex-direction: column;
 }
 
+a{
+    text-decoration: white;
+    color: white;
+    outline: none;
+}
+
 header{
     background-color: rgb(63,63,63);
     width: 100%;
@@ -16,7 +22,7 @@ header{
     margin: 0;
     display: flex;
     justify-content: space-between;
-    z-index: 1;
+    z-index: 2;
 }
 
 main{
@@ -35,9 +41,9 @@ main{
     color: white;
     position: fixed;
     top: 10%;
-    left:0;
+    left: 0;
     background-color: rgb(63, 63, 63);
-    width: 28%;
+    width: 25%;
     max-width: 300px;
     height: 100%;
     opacity: 0;
@@ -49,6 +55,7 @@ main{
 #menu.visible {
     transition: transform 0.5s;
     opacity: 1;
+
     visibility: visible;
     animation: slideDown .5s ease-out forwards;
             /* Nombre  duración   tiempo-función    */
@@ -56,16 +63,19 @@ main{
 
 .enlace{
     position: relative;
-    left: 20px;
     margin-top: 10px;
-    border: 1px solid black;
-    border-radius: 10px;
-    width: 150px;
+    text-align: center;
+    width: 97%;
     height: 50px;
     display: flex;
     align-items: center;
     gap: 5px;
     padding-left: 8px;
+}
+
+.enlace:hover{
+    background-color: rgb(74, 72, 72);
+    transition: 1s;
 }
 
 @keyframes slideDown {
@@ -92,6 +102,25 @@ main{
 
 /*Fin del menu*/
 
+
+
+.H-right{
+    background-color: rgb(63,63,63);
+    display: flex;
+    flex-direction: row-reverse;
+    /* width: 100%; */
+    height:100%;
+}
+
+.hdp{
+    border: none;
+    width: 70px;
+    height: 100%;
+    color: white;
+    background-color: rgb(60,63,63);
+    display: flex;
+    align-items: center;
+}
 button{
     border: none;
     width: 70px;
@@ -106,3 +135,14 @@ header img{
     height: 50px;
     margin-right: 15px;
 }
+
+.contendorBody{
+    background-color: rgba(0, 0, 255, 0.436);
+    width: 100vw;
+    height: auto;
+    margin-top: 80px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+

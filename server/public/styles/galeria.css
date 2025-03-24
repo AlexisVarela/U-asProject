@@ -1,4 +1,3 @@
-
 /* Galeria */
 .Galeria{
     width: 90%;
@@ -50,12 +49,3 @@ section img:hover{
     filter: contrast(120%);
 }
 
-.contendorBody{
-    background-color: rgba(0, 0, 255, 0.436);
-    width: 100vw;
-    height: 100vh;
-    margin-top: 80px;
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-}

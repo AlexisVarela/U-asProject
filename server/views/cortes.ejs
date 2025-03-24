@@ -1,0 +1,33 @@
+<%-include('layout',{title: 'cortes', body: ``})%>
+<!-- <link rel="stylesheet" href="./styles/FormularioCortes.css"> -->
+<link rel="stylesheet" href="/styles/vistaCortes.css">
+<div class="ContendorFormularioCortes">
+    <div class="existentes">
+        <h2>Editar corte</h2>
+        <form class="formAgregarCorte" action="/cortes/addCorte" method="POST">
+            <input type="text" name="corte" placeholder="Nombre del corte" required>
+            <input type="number" name="precio" placeholder="Precio" required>
+            <button class="botonAgregar" type="submit">Agregar</button>
+        </form>
+    </div>
+    <div class="listaCortes">
+        <h2>Lista de Cortes</h2>
+        <ul>    
+        <% cortes.forEach(corte => { %>
+            <li>
+                <%= corte.corte %> - $<%= corte.precio %>
+                <form action="/cortes/editCorte/<%= corte._id %>" method="POST">
+                    <input type="text" name="corte" value="<%= corte.corte %>">
+                    <input type="number" name="precio" value="<%= corte.precio %>">
+                    <button class="actualizar" type="submit">Actualizar</button>
+                </form>
+                <form action="/cortes/deleteCorte/<%= corte._id %>" method="POST">
+                    <button class="eliminar" type="submit">Eliminar</button>
+                </form>
+            </li>
+        <% }); %>
+        </ul>
+    </div>
+</div>
+
+

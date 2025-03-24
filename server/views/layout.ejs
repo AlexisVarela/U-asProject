@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/styles/principal.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <!-- Condicional para que si no encuentra el archivo css del layout
-         se siga mostrandoel de la vista individual -->
+        se siga mostrandoel de la vista individual -->
     <% if (typeof cssFile !== 'undefined') { %>
         <link rel="stylesheet" href="<%= cssFile %>">
     <% } %>
@@ -16,8 +16,10 @@
     <%- include('partials/header') %>
         <!-- Comienzo del contenido -->
         <div class="contendorBody">
-                <%- body %>
+            <%- typeof body !== 'undefined' ? body : '' %>
+
         </div>         
+
 
     <script src="/js/principal.js"></script>
 </body>
