@@ -8,7 +8,6 @@ const methodOverride = require('method-override');
 
 // Cargar variables de entorno
 const bcrypt = require('bcryptjs');
-const session = require('express-session');
 const { pool } = require('./controller/config/conexionbd');
 const { v4: uuidv4 } = require('uuid');
 const axios = require('axios');
@@ -67,7 +66,7 @@ app.use(session({
     saveUninitialized: true
 }));
 
-
+// Rutas de login (Eric)
 const rutas2SQL = require('./routes/rutas2SQL');
 app.use('/', rutas2SQL);
 
@@ -118,93 +117,6 @@ app.get('/EstiloCabello', (req, res) => {
 
 app.get('/EstiloUnas', (req, res) => {
     res.render('EstiloUnas', { title: 'Estilos de Uñas', cssFile: '/styles/Estilos.css' });
-});
-
-// ======================================
-// RUTAS DE AUTENTICACIÓN (Eric)
-// ======================================
-
-app.get('/register', (req, res) => {
-    res.render('register', { 
-        title: "Registro",  
-        cssFile: '/styles/LoginDB.css', 
-        recaptchaSiteKey: process.env.GOOGLE_CLAVE_DE_SITIO
-    });
-});
-
-app.post('/register', async (req, res) => {
-    const { 'g-recaptcha-response': recaptchaResponse, nombre, email, password } = req.body;
-
-    if (!recaptchaResponse) {
-        return res.status(400).json({ error: 'Por favor, completa el reCAPTCHA.' });
-    }
-
-    try {
-        // Verificar reCAPTCHA
-        const { data } = await axios.post('https://www.google.com/recaptcha/api/siteverify', null, {
-            params: {
-                secret: process.env.GOOGLE_CLAVE_SECRETA,
-                response: recaptchaResponse
-            }
-        });
-
-        if (!data.success) {
-            return res.status(400).json({ error: 'Error en la verificación de reCAPTCHA.' });
-        }
-
-        // Hash de la contraseña
-        const hashedPassword = await bcrypt.hash(password, 10);
-        
-        // Insertar en la base de datos
-        const connection = await pool.getConnection();
-        await connection.query(
-            'INSERT INTO usuarios (nombre, email, password) VALUES (?, ?, ?)', 
-            [nombre, email, hashedPassword]
-        );
-        connection.release();
-
-        res.status(200).json({ success: true, redirect: '/login' });
-    } catch (error) {
-        console.error('Error en el registro:', error);
-        res.status(500).json({ error: 'Error al registrar usuario.' });
-    }
-});
-
-app.get('/login', (req, res) => {
-    res.render('login', { titulo: "Iniciar Sesión", cssFile: '/styles/LoginDB.css' });
-});
-
-app.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-
-    try {
-        const connection = await pool.getConnection();
-        const [results] = await connection.query('SELECT * FROM usuarios WHERE email = ?', [email]);
-        connection.release();
-
-        if (results.length === 0) {
-            return res.send('Usuario no encontrado');
-        }
-
-        const user = results[0];
-        const isMatch = await bcrypt.compare(password, user.password);
-        
-        if (!isMatch) {
-            return res.send('Contraseña incorrecta');
-        }
-
-        req.session.user = user;
-        res.redirect('/');
-    } catch (err) {
-        console.error('Error en el login:', err);
-        res.send('Error en el login');
-    }
-});
-
-app.get('/logout', (req, res) => {
-    req.session.destroy(() => {
-        res.redirect('/');
-    });
 });
 
 // ======================================
