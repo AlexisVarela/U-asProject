@@ -103,15 +103,20 @@ app.use(session({
 const rutas2SQL = require('./routes/rutas2SQL');
 app.use('/', rutas2SQL);
 
-// Mongoose
+// ------------ Mongoose -------------
 const {conectarseMongo} = require('./controller/config/conexionMongo'); //Para conectarse con mongo
 const rutasCortes = require('./routes/rutasCortes');
+const rutasUnas = require('./routes/rutasUnas.js');
 
 // Conectar con mongo
 conectarseMongo();
 
 // Rutas para cortes
 app.use('/cortes', rutasCortes);
+app.use('/unasVista', rutasUnas);
+
+
+// -------------[Angie]----------------
 // Ruta para obtener eventos de Google Calendar
 app.get('/obtener-eventos', async (req, res) => {
     try {
