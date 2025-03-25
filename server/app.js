@@ -2,7 +2,11 @@ const express = require('express');
 const app = express();
 const dotenv = require('dotenv');
 const path = require("path");
+const session = require('express-session'); // para sql
 const bodyParser = require('body-parser');
+const methodOverride = require('method-override');
+
+// Cargar variables de entorno
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const { pool } = require('./controller/config/conexionbd');
@@ -12,23 +16,22 @@ const { google } = require('googleapis');
 const analytics = google.analyticsreporting('v4');
 const GoogleCalendar = require('./googleCalendar.js');
 
-// Configuración inicial
 dotenv.config();
 
 // Middlewares
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true
-}));
 
 // Configuración del motor de vistas
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
+
+
+// Permisos para put y delete
+app.use(methodOverride('_method')); 
+// Middleware para procesar datos de los formularios
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); // Para procesar JSON en las solicitudes
 
 // Variables globales
 const citasPendientes = new Map(); // Almacena citas pendientes de confirmación
@@ -56,6 +59,42 @@ const { getAnalyticsUsers } = require('./public/js/analytics');
 // ======================================
 // RUTAS DE VISTAS
 // ======================================
+// -----------------SQL-----------------
+// Configuración de la sesión
+app.use(session({
+    secret: process.env.SESSION_SECRET,  
+    resave: false,
+    saveUninitialized: true
+}));
+
+
+const rutas2SQL = require('./routes/rutas2SQL');
+app.use('/', rutas2SQL);
+
+
+// --------------Mongoose-------------
+const {conectarseMongo} = require('./controller/config/conexionMongo'); //Para conectarse con mongo
+const rutasCortes = require('./routes/rutasCortes');
+const rutasUnas = require('./routes/rutasUnas.js');
+
+// Conectar con mongo
+conectarseMongo();
+
+// Rutas para cortes
+app.use('/cortes', rutasCortes);
+app.use('/unasVista', rutasUnas);
+
+
+// -------------[Angie]----------------
+// Ruta para obtener eventos de Google Calendar
+app.get('/obtener-eventos', async (req, res) => {
+    try {
+        const eventos = await googleCalendar.getEvents(); // Método para obtener eventos
+        res.status(200).json(eventos);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 app.get('/', (req, res) => {
     res.render('carrucel');

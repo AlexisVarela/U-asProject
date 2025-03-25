@@ -98,7 +98,8 @@
 
         <!-- Comienzo del contenido -->
         <div class="contendorBody">
-                <%- body %>
+            <%- typeof body !== 'undefined' ? body : '' %>
+
         </div>         
 
 

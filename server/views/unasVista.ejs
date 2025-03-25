@@ -1,0 +1,33 @@
+<%-include('layout',{title: 'cortes', body: ``})%>
+<!-- <link rel="stylesheet" href="./styles/FormularioCortes.css"> -->
+<link rel="stylesheet" href="/styles/vistaUnas.css">
+<div class="ContendorFormularioCortes">
+    <div class="existentes">
+        <h2>Editar Uñas</h2>
+        <form class="formAgregarCorte" action="/unasVista/addUnas" method="POST">
+            <input type="text" name="uña" placeholder="Nombre de la uña" required>
+            <input type="number" name="precio" placeholder="Precio" required>
+            <input type="number" name="numero" placeholder="Numero" required>
+            <button class="botonAgregar" type="submit">Agregar</button>
+        </form>
+    </div>
+    <div class="listaCortes">
+        <h2>Lista de Uñas</h2>
+        <ul>    
+        <% uñas.forEach(uña => { %>
+            <li>
+                <%= uña.uña %> - $<%= uña.precio %> - $<%= uña.numero %>
+                <form action="/unasVista/editUnas/<%= uña._id %>" method="POST">
+                    <input type="text" name="uña" value="<%= uña.uña %>">
+                    <input type="number" name="precio" value="<%= uña.precio %>">
+                    <input type="number" name="numero" value="<%= uña.numero %>">
+                    <button class="actualizar" type="submit">Actualizar</button>
+                </form>
+                <form action="/unasVista/deleteUnas/<%= uña._id %>" method="POST">
+                    <button class="eliminar" type="submit">Eliminar</button>
+                </form>
+            </li>
+        <% }); %>
+        </ul>
+    </div>
+</div>

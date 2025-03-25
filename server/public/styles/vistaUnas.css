@@ -1,0 +1,89 @@
+.ContendorFormularioCortes{
+    height: 100vh;
+    width: 100vw;
+    background-color: rgb(89, 125, 125);
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; */
+    align-items: center;
+}
+
+.existentes{
+    width: 400px;
+    height: 350px;
+    background-color: white;
+    margin: 20px;
+    margin-bottom: 50px;
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 10px;
+}
+.formAgregarCorte{
+    /* background-color: bisque; */
+    display: grid;
+    grid-template-rows: repeat(3, 40px);
+    grid-template-columns: 1fr;
+    width: 90%;
+    height: 50%;
+}
+
+.formAgregarCorte .botonAgregar, form .eliminar{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+form .actualizar{
+    width: 45%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.listaCortes{
+    background-color: rgb(254, 254, 254);
+    width: 70%;
+    height: auto;
+    text-align: center;
+    border-radius: 15px;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 3fr;
+    gap: 15px;
+    
+}
+
+form{ /*Formularios*/
+    width: 90%;
+    height: 30px;
+    background-color: blueviolet;
+    margin: 10px;
+    display: flex;
+    gap: 8px;
+}
+
+li{
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-rows: auto;
+    border: 1px solid black;
+    margin-left: 0px;
+    align-items: center;
+}
+ul{
+    list-style: none;
+    padding-left: 0;
+    margin-top: 0;
+}
+
+/* form .eliminar{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+} */

@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js",
-    "dev": "node --watch app.js"
+    "dev": "nodemon app.js",
+    "start": "node --watch app.js"
   },
   "keywords": [],
   "author": "Gabriel Figueras",
