@@ -103,7 +103,8 @@ app.use(session({
 const rutas2SQL = require('./routes/rutas2SQL');
 app.use('/', rutas2SQL);
 
-// ------------ Mongoose -------------
+
+// --------------Mongoose-------------
 const {conectarseMongo} = require('./controller/config/conexionMongo'); //Para conectarse con mongo
 const rutasCortes = require('./routes/rutasCortes');
 const rutasUnas = require('./routes/rutasUnas.js');
