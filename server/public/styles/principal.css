@@ -76,6 +76,31 @@ a{
             /* Nombre  duración   tiempo-función    */
 }
 
+@media (width<610px){
+    #menu {
+        z-index: 2;
+        color: var(--color-sidebar-letras);
+        position: fixed;
+        top: 5%;
+        background-color: var(--color-sidebar);
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        visibility: hidden;
+        animation: cerrarMenu .5s ease-out forwards;
+        transition: opacity .5s ease, visibility 1s ease;
+    }
+
+    #menu.visible {
+        transition: transform 0.5s;
+        opacity: 1;
+
+        visibility: visible;
+        animation: slideDown .5s ease-out forwards;
+                /* Nombre  duración   tiempo-función    */
+    }
+}
+
 .enlace{
     position: relative;
     margin-top: 5px;
@@ -137,6 +162,7 @@ a{
     display: flex;
     align-items: center;
 }*/
+
 button{
     border: none;
     width: 70px;
