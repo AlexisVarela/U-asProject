@@ -55,4 +55,5 @@ const logoutUser = (req, res) => {
     });
 };
 
+
 module.exports = { registerUser, loginUser, logoutUser };
