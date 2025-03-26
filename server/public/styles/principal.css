@@ -8,7 +8,7 @@
 }
 body{
     height: 100%;
-    width: 100vw;
+    width: 100%;
     padding: 0;
     margin: 0;
     background-color: var(--color-fondo);
@@ -20,6 +20,9 @@ a{
     text-decoration: white;
     color: var(--color-sidebar-letras);
     outline: none;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
 }
 
 header{
@@ -42,49 +45,35 @@ main{
     flex-direction: column;
 }
 
-a{
+.enlace{
+    flex: 1 0 45%; /* 1ra columna ocupará el 45% del contenedor */
+    position: relative;
+    text-align: center;
+    height: 8%;
     display: flex;
     align-items: center;
-    text-decoration: none;
-
+    gap: 10px;
+    padding-left: 8px;
 }
 
-/*Inicio de deepseek*/
-
-#menu {
-    z-index: 2;
-    color: var(--color-sidebar-letras);
-    position: fixed;
-    top: 5%;
-    background-color: var(--color-sidebar);
-    width: 10%;
-    max-width: 360px;
-    height: 1000px;
-    max-height: 100%;
-    opacity: 0;
-    visibility: hidden;
-    animation: cerrarMenu .5s ease-out forwards;
-    transition: opacity .5s ease, visibility 1s ease;
+.enlace:hover{
+    background-color: var(--color-sidebar-variable);
+    color: #f5f5f5;
+    transition: .5s;
 }
 
-#menu.visible {
-    transition: transform 0.5s;
-    opacity: 1;
-
-    visibility: visible;
-    animation: slideDown .5s ease-out forwards;
-            /* Nombre  duración   tiempo-función    */
-}
-
-@media (width<610px){
+ /* AQUI SE SUPONE QUE LO HACEMOS RESPONSIVO */
+@media (min-width:280px){
     #menu {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
         z-index: 2;
         color: var(--color-sidebar-letras);
         position: fixed;
-        top: 5%;
         background-color: var(--color-sidebar);
         width: 100%;
-        height: 100%;
+        height: 90%;
         opacity: 0;
         visibility: hidden;
         animation: cerrarMenu .5s ease-out forwards;
@@ -101,22 +90,58 @@ a{
     }
 }
 
-.enlace{
-    position: relative;
-    margin-top: 5px;
-    text-align: center;
-    width: 95%;
-    height: 8.20%;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding-left: 8px;
+@media (min-width:600px){
+    #menu {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        z-index: 2;
+        color: var(--color-sidebar-letras);
+        background-color: var(--color-sidebar);
+        width: 100%;
+        height: 90%;
+        opacity: 0;
+        visibility: hidden;
+        animation: cerrarMenu .5s ease-out forwards;
+        transition: opacity .5s ease, visibility 1s ease;
+    }
+
+    #menu.visible {
+        transition: transform 0.5s;
+        opacity: 1;
+
+        visibility: visible;
+        animation: slideDown .5s ease-out forwards;
+                /* Nombre  duración   tiempo-función    */
+    }
+
+
 }
 
-.enlace:hover{
-    background-color: var(--color-sidebar-variable);
-    color: #f5f5f5;
-    transition: .5s;
+@media (min-width:901px){
+    #menu {
+        z-index: 2;
+        color: var(--color-sidebar-letras);
+        position: fixed;
+        background-color: var(--color-sidebar);
+        width: 10%;
+        height: 95%;
+        opacity: 0;
+        visibility: hidden;
+        animation: cerrarMenu .5s ease-out forwards;
+        transition: opacity .5s ease, visibility 1s ease;
+        margin-top: 50px;
+    }
+    
+    #menu.visible {
+        transition: transform 0.5s;
+        opacity: 1;
+    
+        visibility: visible;
+        animation: slideDown .5s ease-out forwards;
+                /* Nombre  duración   tiempo-función    */
+    }
+
 }
 
 @keyframes slideDown {
@@ -183,8 +208,8 @@ header img{
     background-color: var(--color-fondo);
     border-radius: 10px;
     width: 100vw;
-    height: auto;
-    margin-top: 70px;
+    height: 100%;
+    margin-top: 60px;
     display: flex;
     align-items: center;
     flex-direction: column;

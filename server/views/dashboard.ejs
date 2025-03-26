@@ -1,12 +1,14 @@
 <%- include('layout', {title: 'Dashboard', body: `
     <div class="dashboard-container">
-        <h1>Dashboard Estadístico</h1>
+        <h1>Dashboard Estadístico</h1>       
 
-        <!-- Gráfica de clics en tarjetas -->
-        <div id="chart_clics" style="width: 900px; height: 500px;"></div>
+        <div class="tables-container">
+            <!-- Gráfica de clics en tarjetas -->
+            <div id="chart_clics"></div>
 
-        <!-- Gráfica de usuarios -->
-        <div id="chart_usuarios" style="width: 900px; height: 500px; margin-top: 50px;"></div>
+            <!-- Gráfica de usuarios -->
+            <div id="chart_usuarios"></div>
+        </div>
     </div>
 
     <!-- Carga la librería de Google Charts -->

@@ -119,6 +119,7 @@ app.get('/EstiloUnas', (req, res) => {
     res.render('EstiloUnas', { title: 'Estilos de Uñas', cssFile: '/styles/Estilos.css' });
 });
 
+
 // ======================================
 // RUTAS DE CITAS Y CALENDARIO
 // ======================================
@@ -263,4 +264,10 @@ app.get('/obtener-clics', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+});
+
+
+//PRUEBAS DE RUTA
+app.get('/layout2', (req, res) => {
+    res.render('layout2', {title: "Layout", cssFile: '/styles/layout2.css' });
 });
