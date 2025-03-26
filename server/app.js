@@ -2,9 +2,15 @@ const express = require('express');
 const app = express();
 const dotenv = require('dotenv');
 const path = require("path");
-const session = require('express-session'); // para sql
+const session = require('express-session');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
+
+
+const { isAuthenticated, isAdmin } = require('./middleware/authMiddleware');
+const passport = require('./controller/config/passport.js'); 
+const flash = require('connect-flash');
+
 
 // Cargar variables de entorno
 const bcrypt = require('bcryptjs');
@@ -24,6 +30,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
+
 
 
 // Permisos para put y delete
@@ -55,16 +62,22 @@ const googleCalendar = new GoogleCalendar(
 const { enviarConfirmacion, agendarCita } = require("./public/js/correo");
 const { getAnalyticsUsers } = require('./public/js/analytics');
 
+
+
 // ======================================
 // RUTAS DE VISTAS
 // ======================================
 // -----------------SQL-----------------
 // Configuración de la sesión
 app.use(session({
-    secret: process.env.SESSION_SECRET,  
+    secret: process.env.SESSION_SECRET, 
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: false // <- Cambia a `false` por seguridad
 }));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 // Rutas de login (Eric)
 const rutas2SQL = require('./routes/rutas2SQL');
@@ -95,28 +108,40 @@ app.get('/obtener-eventos', async (req, res) => {
     }
 });
 
+// app.get('/', (req, res) => {
+//     res.render('carrucel');
+// });
+
+app.use((req, res, next) => {
+    res.locals.user = req.user || null; // Hace que 'user' esté disponible en todas las vistas
+    next();
+});
+
 app.get('/', (req, res) => {
-    res.render('carrucel');
+    res.render('carrucel', { 
+    title: 'Carrucel',
+    user: req.user || null 
+    });
 });
 
 app.get('/Citas', (req, res) => {
-    res.render('Citas', { title: 'citas', cssFile: '/styles/citas.css' });
+    res.render('Citas', { title: 'citas', cssFile: '/styles/citas.css',user: req.user });
 });
 
 app.get('/agendar-cita', (req, res) => {
-    res.render('agendar-cita', { title: 'Agendar Cita', cssFile: '/styles/agendar.css' });
+    res.render('agendar-cita', { title: 'Agendar Cita', cssFile: '/styles/agendar.css',user: req.user });
 });
 
 app.get('/dashboard', (req, res) => {
-    res.render('dashboard', { titulo: "Dashboard", cssFile: '/styles/dashboard.css' });
+    res.render('dashboard', { titulo: "Dashboard", cssFile: '/styles/dashboard.css',user: req.user });
 });
 
 app.get('/EstiloCabello', (req, res) => {
-    res.render('EstiloCabello', { title: 'Cortes de Cabello', cssFile: '/styles/Estilos.css' });
+    res.render('EstiloCabello', { title: 'Cortes de Cabello', cssFile: '/styles/Estilos.css', user: req.user });
 });
 
 app.get('/EstiloUnas', (req, res) => {
-    res.render('EstiloUnas', { title: 'Estilos de Uñas', cssFile: '/styles/Estilos.css' });
+    res.render('EstiloUnas', { title: 'Estilos de Uñas', cssFile: '/styles/Estilos.css', user: req.user });
 });
 
 // ======================================
@@ -256,6 +281,27 @@ app.get('/obtener-clics', (req, res) => {
     res.json(clicsPorTarjeta);
 });
 
+
+//===========================================================================
+app.get('/test', (req, res) => {
+    if (req.user) {
+        res.send(`
+            <h1>✅ Usuario autenticado</h1>
+            <p>ID: ${req.user.id}</p>
+            <p>Nombre: ${req.user.nombre}</p>
+            <p>Email: ${req.user.email}</p>
+            <p>Rol: ${req.user.role_id === 1 ? 'Admin' : 'User'}</p>
+            <a href="/logout">Cerrar sesión</a>
+        `);
+    } else {
+        res.send(`
+            <h1>🔐 No autenticado</h1>
+            <p>Por favor, <a href="/login">inicia sesión</a>.</p>
+        `);
+    }
+});
+
+
 // ======================================
 // INICIO DEL SERVIDOR
 // ======================================
@@ -264,3 +310,6 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });
+
+
+

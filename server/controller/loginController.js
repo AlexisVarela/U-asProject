@@ -1,68 +1,48 @@
 const bcrypt = require('bcryptjs');
 const { pool } = require('./config/conexionbd');
+const passport = require('passport'); // Añadir esta línea
 
-// Registrar usuario
-
-const reCAPTCHA = async (req, res) =>{
+// Registrar usuario (reCAPTCHA se mantiene igual)
+const reCAPTCHA = async (req, res) => {
     res.render('register', { 
         title: "Registro",  
         cssFile: '/styles/LoginDB.css', 
-        recaptchaSiteKey: process.env.GOOGLE_CLAVE_DE_SITIO // Pasar la clave de sitio
+        recaptchaSiteKey: process.env.GOOGLE_CLAVE_DE_SITIO
     });
-}
+};
 
-const registerUser = async (req, res) => {
-    const { nombre, email, password } = req.body;
+// Registro con Passport (adaptado para incluir reCAPTCHA si es necesario)
+const registerUser = async (req, res, next) => {
+    const { nombre, email, password, role_id } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
 
     try {
         const connection = await pool.getConnection();
-        await connection.query('INSERT INTO usuarios (nombre, email, password) VALUES (?, ?, ?)', 
-            [nombre, email, hashedPassword]);
-        connection.release(); // Liberar conexión del pool
-
+        await connection.query(
+            'INSERT INTO usuarios (nombre, email, password, role_id) VALUES (?, ?, ?, ?)',
+            [nombre, email, hashedPassword, role_id] // 2 = Rol de usuario por defecto
+        );
+        connection.release();
+        
+        // Redirigir al login tras registro exitoso
         res.redirect('/login');
     } catch (err) {
         console.error('Error en el registro:', err);
-        res.send('Error al registrar usuario');
+        res.redirect('/register');
     }
 };
 
-// Iniciar sesión
-const loginUser = async (req, res) => {
-    const { email, password } = req.body;
+// Login y Logout (ahora manejados por Passport directamente)
+const loginUser = passport.authenticate('local', {
+    successRedirect: '/',
+    failureRedirect: '/login',
+    failureFlash: true // Requiere connect-flash
+});
 
-    try {
-        const connection = await pool.getConnection();
-        const [results] = await connection.query('SELECT * FROM usuarios WHERE email = ?', [email]);
-        connection.release();
-
-        if (results.length === 0) {
-            return res.send('Usuario no encontrado');
-        }
-
-        const user = results[0];
-
-        // Verificar contraseña
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.send('Contraseña incorrecta');
-        }
-
-        req.session.user = user;
-        res.redirect('/');
-    } catch (err) {
-        console.error('Error en el login:', err);
-        res.send('Error en el login');
-    }
-};
-
-// Cerrar sesión
 const logoutUser = (req, res) => {
-    req.session.destroy(() => {
+    req.logout(() => {
         res.redirect('/');
     });
 };
 
-module.exports = { registerUser, loginUser, logoutUser,reCAPTCHA};
-
+module.exports = { registerUser, loginUser, logoutUser, reCAPTCHA };

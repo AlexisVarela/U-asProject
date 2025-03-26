@@ -20,11 +20,12 @@
             <a href="/">Home</a>
         </div>
 
+        <% if (user && user.role_id === 1) { %>
          <div class="enlace">
-            
              <i class="bx bx-grid-alt bx-md"></i>
-             <a href="http://localhost:3000/dashboard">Dashboard</a>
+             <a href="/dashboard">Dashboard</a>
          </div>
+        <% } %>
 
          <div class="enlace">
             <i class='bx bx-cut bx-md'></i>
@@ -36,10 +37,12 @@
             <a href="/unasVista">Uñas</a>
          </div>
 
-         <div class="enlace">
+        <% if (user && user.role_id === 1) { %>
+        <div class="enlace">
             <i class="bx bx-grid-alt bx-md"></i>
             <a href="/Citas" >Citas</a>
         </div>
+        <% } %>
 
          <div class="enlace">
              <i class="bx bx-message-square bx-md"></i>
@@ -67,8 +70,8 @@
          </div>
 
          <div class="enlace">
-             <i class="bx bx-cog bx-md"></i>
-             <span>Configuración</span>
-         </div>
+            <i class="bx bx-log-out bx-md"></i>
+            <a href="/logout">Cerrar sesión</a>
+        </div>
      </div>
 <!-- </main> -->
