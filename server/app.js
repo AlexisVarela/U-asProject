@@ -6,11 +6,9 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 
-
-const { isAuthenticated, isAdmin } = require('./middleware/authMiddleware');
+const { isAuthenticated, isAdmin, apiAuth } = require('./middleware/authMiddleware');
 const passport = require('./controller/config/passport.js'); 
 const flash = require('connect-flash');
-
 
 // Cargar variables de entorno
 const bcrypt = require('bcryptjs');
@@ -31,27 +29,61 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Configuración de sesión
+app.use(session({
+    secret: process.env.SESSION_SECRET, 
+    resave: false,
+    saveUninitialized: false
+}));
 
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(flash());
+
+// Middleware para hacer user disponible en todas las vistas
+app.use((req, res, next) => {
+    res.locals.user = req.user || null;
+    next();
+});
+
+// Rutas públicas (no requieren autenticación)
+const publicRoutes = [
+    '/',
+    '/login',
+    '/register',
+    '/obtener-eventos',
+    '/agendar-cita',
+    '/confirmar-cita'
+    // Agrega aquí otras rutas públicas
+];
+
+// Middleware global de seguridad
+app.use((req, res, next) => {
+    if (publicRoutes.includes(req.path)) return next();
+    if (!req.isAuthenticated()) {
+        req.flash('error', 'Debes iniciar sesión para acceder');
+        return res.redirect('/login');
+    }
+    next();
+});
 
 // Permisos para put y delete
 app.use(methodOverride('_method')); 
-// Middleware para procesar datos de los formularios
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json()); // Para procesar JSON en las solicitudes
+app.use(express.json());
 
 // Variables globales
-const citasPendientes = new Map(); // Almacena citas pendientes de confirmación
-const clicksMap = new Map(); // Almacena clics en tarjetas
-const clicsPorTarjeta = {}; // Almacena clics por tarjeta (alternativo)
+const citasPendientes = new Map();
+const clicksMap = new Map();
+const clicsPorTarjeta = {};
 
-// Configuración de Google Analytics
+// Configuración de Google APIs
 const authClient = new google.auth.JWT({
     email: process.env.CORREO_ANALYTICS,
     key: process.env.ID_ANALYTICS.replace(/\\n/g, '\n'),
     scopes: ['https://www.googleapis.com/auth/analytics.readonly'],
 });
 
-// Configuración de Google Calendar
 const googleCalendar = new GoogleCalendar(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
@@ -62,132 +94,95 @@ const googleCalendar = new GoogleCalendar(
 const { enviarConfirmacion, agendarCita } = require("./public/js/correo");
 const { getAnalyticsUsers } = require('./public/js/analytics');
 
-
-
 // ======================================
-// RUTAS DE VISTAS
+// RUTAS
 // ======================================
-// -----------------SQL-----------------
-// Configuración de la sesión
-app.use(session({
-    secret: process.env.SESSION_SECRET, 
-    resave: false,
-    saveUninitialized: false // <- Cambia a `false` por seguridad
-}));
 
-app.use(passport.initialize());
-app.use(passport.session());
-
-
-// Rutas de login (Eric)
+// Rutas de login
 const rutas2SQL = require('./routes/rutas2SQL');
 app.use('/', rutas2SQL);
 
-
-// --------------Mongoose-------------
-const {conectarseMongo} = require('./controller/config/conexionMongo'); //Para conectarse con mongo
-const rutasCortes = require('./routes/rutasCortes');
-const rutasUnas = require('./routes/rutasUnas.js');
-
-// Conectar con mongo
+// Rutas de MongoDB
+const { conectarseMongo } = require('./controller/config/conexionMongo');
 conectarseMongo();
 
-// Rutas para cortes
+const rutasCortes = require('./routes/rutasCortes');
+const rutasUnas = require('./routes/rutasUnas.js');
 app.use('/cortes', rutasCortes);
 app.use('/unasVista', rutasUnas);
 
-
-// -------------[Angie]----------------
-// Ruta para obtener eventos de Google Calendar
-app.get('/obtener-eventos', async (req, res) => {
-    try {
-        const eventos = await googleCalendar.getEvents(); // Método para obtener eventos
-        res.status(200).json(eventos);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// app.get('/', (req, res) => {
-//     res.render('carrucel');
-// });
-
-app.use((req, res, next) => {
-    res.locals.user = req.user || null; // Hace que 'user' esté disponible en todas las vistas
-    next();
-});
-
+// Rutas de vistas principales
 app.get('/', (req, res) => {
     res.render('carrucel', { 
-    title: 'Carrucel',
-    user: req.user || null 
+        title: 'Carrucel',
+        user: req.user || null 
     });
 });
 
-app.get('/Citas', (req, res) => {
-    res.render('Citas', { title: 'citas', cssFile: '/styles/citas.css',user: req.user });
+app.get('/Citas', isAuthenticated, (req, res) => {
+    res.render('Citas', { 
+        title: 'citas', 
+        cssFile: '/styles/citas.css',
+        user: req.user 
+    });
 });
 
-app.get('/agendar-cita', (req, res) => {
-    res.render('agendar-cita', { title: 'Agendar Cita', cssFile: '/styles/agendar.css',user: req.user });
+app.get('/agendar-cita', isAuthenticated, (req, res) => {
+    res.render('agendar-cita', { 
+        title: 'Agendar Cita', 
+        cssFile: '/styles/agendar.css',
+        user: req.user 
+    });
 });
 
-app.get('/dashboard', (req, res) => {
-    res.render('dashboard', { titulo: "Dashboard", cssFile: '/styles/dashboard.css',user: req.user });
+app.get('/dashboard', isAuthenticated, (req, res) => {
+    res.render('dashboard', { 
+        titulo: "Dashboard", 
+        cssFile: '/styles/dashboard.css',
+        user: req.user 
+    });
 });
 
-app.get('/EstiloCabello', (req, res) => {
-    res.render('EstiloCabello', { title: 'Cortes de Cabello', cssFile: '/styles/Estilos.css', user: req.user });
+app.get('/EstiloCabello', isAuthenticated, (req, res) => {
+    res.render('EstiloCabello', { 
+        title: 'Cortes de Cabello', 
+        cssFile: '/styles/Estilos.css', 
+        user: req.user 
+    });
 });
 
-app.get('/EstiloUnas', (req, res) => {
-    res.render('EstiloUnas', { title: 'Estilos de Uñas', cssFile: '/styles/Estilos.css', user: req.user });
+app.get('/EstiloUnas', isAuthenticated, (req, res) => {
+    res.render('EstiloUnas', { 
+        title: 'Estilos de Uñas', 
+        cssFile: '/styles/Estilos.css', 
+        user: req.user 
+    });
+});
+
+// Rutas de administrador
+app.get('/admin', isAuthenticated, isAdmin, (req, res) => {
+    res.render('admin-panel', { 
+        title: 'Admin Panel',
+        user: req.user 
+    });
 });
 
 // ======================================
-// RUTAS DE CITAS Y CALENDARIO
+// RUTAS DE API
 // ======================================
 
-app.post('/agendar-cita', async (req, res) => {
-    const { email, titulo, descripcion, fecha } = req.body;
+app.post('/crear-evento', apiAuth, async (req, res) => {
+    const { summary, location, description, start, end } = req.body;
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        return res.status(400).json({ error: "Correo electrónico inválido." });
+    if (!start) {
+        return res.status(400).json({ error: 'El campo start es requerido.' });
     }
 
     try {
-        const token = uuidv4();
-        const hora = fecha.split('T')[1].slice(0, 5);
-
-        citasPendientes.set(token, { email, titulo, descripcion, fecha });
-        await enviarConfirmacion(email, fecha.split('T')[0], hora, token);
-
-        res.status(200).json({ mensaje: "✅ Correo de confirmación enviado. Por favor, revisa tu correo." });
+        const linkEvento = await googleCalendar.createEvent(summary, description, start);
+        res.status(200).json({ message: 'Evento creado', link: linkEvento });
     } catch (error) {
-        console.error("❌ Error al agendar la cita:", error);
         res.status(500).json({ error: error.message });
-    }
-});
-
-app.get('/confirmar-cita', async (req, res) => {
-    const { token } = req.query;
-
-    if (!token || !citasPendientes.has(token)) {
-        return res.status(400).send("Token inválido o cita no encontrada.");
-    }
-
-    try {
-        const cita = citasPendientes.get(token);
-        const { email, titulo, descripcion, fecha } = cita;
-
-        await agendarCita(email, titulo, descripcion, fecha);
-        citasPendientes.delete(token);
-
-        res.send("✅ Cita confirmada y agendada correctamente.");
-    } catch (error) {
-        console.error("❌ Error al confirmar la cita:", error);
-        res.status(500).send("Error al confirmar la cita.");
     }
 });
 

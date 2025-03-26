@@ -1,19 +1,23 @@
-// server/middleware/authMiddleware.js
+// Middleware para verificar autenticación
 module.exports = {
-    // Middleware para verificar si el usuario está logueado
     isAuthenticated: (req, res, next) => {
         if (req.isAuthenticated()) return next();
         req.flash('error', '🔐 Debes iniciar sesión primero');
-        res.redirect('/login');
+        return res.redirect('/login');
     },
-    
 
-    // Middleware para verificar si es ADMIN (role_id = 1)
+    // Middleware para verificar rol de admin
     isAdmin: (req, res, next) => {
         if (req.isAuthenticated() && req.user.role_id === 1) return next();
         req.flash('error', '⛔ Acceso solo para administradores');
-        res.redirect('/dashboard');
+        return res.redirect('/dashboard');
+    },
+
+    // Middleware para APIs
+    apiAuth: (req, res, next) => {
+        if (!req.isAuthenticated()) {
+            return res.status(401).json({ error: 'No autorizado' });
+        }
+        next();
     }
 };
-
-
