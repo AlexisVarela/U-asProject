@@ -1,33 +1,50 @@
+:root {
+    --fuente-titulos: 'Cormorant Garamond', serif;
+    --fuente-subtitulos: 'Poppins', sans-serif;
+    --fuente-texto: 'Nunito Sans', sans-serif;
+    --color-fondo-variable: #24292E;
+    --fondo: #f5f5f5;
+    --color-galeria: #1D2125;
+}
+
 /* Galeria */
 .Galeria{
-    width: 90%;
+    width: 95%;
     height: auto;
     margin-top: 20px;
-    background-color: black;
+    background-color: var(--color-galeria);
+    border-radius: 5px;
 }
 
 .lorem{
+    text-align: justify;
     margin-top: 20px;
-    width: 80%;
+    width: 92%;
     height: auto;
     max-height: 400px;
-    background-color: rgb(75, 75, 75);
+    border-radius: 5px;
+    font-family: var(--fuente-texto);
+    color: #f5f5f5;
 }
 
 h2{
     color: white;
 }
 .nosotros{
-    background-color: darkmagenta;
-    border-radius: 20px;
+    text-align: justify;
+    background-color: var(--color-fondo-variable);
+    border-radius: 10px;
     margin: 20px;
-    padding: 20px;width: 88%;
+    padding: 20px;
+    width: 95%;
+    font-family: var(--fuente-subtitulos);
+    color: rgb(244, 255, 255);
 }
 .TituloChido{
     justify-self: center;
     margin: 10px;
     color: rgb(248, 248, 248);
-    font-family: 'Times New Roman', Times, serif;
+    font-family: var(--fuente-titulos);
 
 }
 section{
@@ -49,3 +66,6 @@ section img:hover{
     filter: contrast(120%);
 }
 
+p{
+    font-family: var(--fuente-texto);
+}

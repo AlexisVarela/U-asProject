@@ -1,11 +1,17 @@
+:root {
+    --color-fondo: #24292E;
+    --color-fondo-variable: #1D2125;
+}
+
 .dashboard-container {
+    color: rgb(244, 255, 255);
     display: flex; /* Activa Flexbox */
     flex-direction: column; /* Ordena el texto (h1) arriba */
     align-items: center; /* Centra los elementos horizontalmente */
     gap: 0px; /* Espaciado entre el título y las tablas */
     font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    max-width: 1800px;
+    background-color: var(--color-fondo);
+    max-width: 100vw;
 }
 
 .tables-container {

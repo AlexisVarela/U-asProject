@@ -1,3 +1,15 @@
+:root{
+    --color-header: #840050;
+    --color-fondo: #f5f5f5;
+}
+.contendorBody2{
+    margin-top: 50px;
+    height: 100vh;
+    max-height: 70%;
+    background-color: var(--color-fondo);
+    border-radius: var(--color-header);
+    box-shadow: 1px 2px 1px black;
+}
 
 .parent {
     display: grid;
